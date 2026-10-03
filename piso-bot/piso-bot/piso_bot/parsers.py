@@ -13,9 +13,11 @@ from bs4 import BeautifulSoup
 
 from .models import Listing
 
-# Habitaclia: .../alquiler-...-i12345678901234.htm   ·   Milanuncios: .../titulo-123456789.htm
+# Habitaclia: formato nuevo /alquiler/<tipo>/<zona>/<ciudad>/<uuid>/d  (y el antiguo ...-i12345678901234.htm)
+# Milanuncios: .../titulo-123456789.htm
+UUID = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 LINK_PATTERNS = {
-    "habitaclia": r"-i(\d{6,})\.htm",
+    "habitaclia": rf"(?:-i(\d{{6,}})\.htm|/({UUID})/d(?:[/?#]|$))",
     "milanuncios": r"-(\d{6,})\.htm",
     "idealista": r"/inmueble/(\d{6,})/",
 }
@@ -54,7 +56,20 @@ def _image(card) -> str | None:
     return None
 
 
+def _agencies(card) -> str:
+    """Etiqueta 'agencia:<nombre>' por cada enlace /inmobiliaria/<nombre>-<n>/ de la tarjeta (Habitaclia)."""
+    names = set()
+    for a in card.find_all("a", href=True):
+        if a["href"].startswith("/inmobiliaria/"):
+            slug = a["href"].strip("/").split("/")[-1]
+            names.add(re.sub(r"-\d+$", "", slug))
+    return "".join(f" agencia:{n}" for n in sorted(names))
+
+
 def _title(card, link_re: str) -> str:
+    label = card.get("aria-label")
+    if label:
+        return label.strip()[:160]
     candidates = []
     for a in card.find_all("a", href=True):
         if re.search(link_re, a["href"]):
@@ -79,7 +94,7 @@ def extract_listings(html: str, base_url: str, source: str) -> list[Listing]:
         m = re.search(link_re, href)
         if not m:
             continue
-        ext_id = m.group(1)
+        ext_id = next(g for g in m.groups() if g)
         if ext_id in found:
             continue
 
@@ -92,10 +107,14 @@ def extract_listings(html: str, base_url: str, source: str) -> list[Listing]:
             text = card.get_text(" ", strip=True)
             if "€" in text and len(text) > 40:
                 break
+        article = a.find_parent("article")
+        if article is not None:  # si la página usa <article>, esa es la tarjeta
+            card = article
         text = card.get_text(" ", strip=True)
         if len(text) > 2500:  # contenedor demasiado grande: no es una tarjeta
             text = a.get_text(" ", strip=True)
             card = a
+        text += _agencies(card)
 
         found[ext_id] = Listing(
             source=source,
