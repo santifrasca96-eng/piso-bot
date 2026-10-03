@@ -66,6 +66,25 @@ def _agencies(card) -> str:
     return "".join(f" agencia:{n}" for n in sorted(names))
 
 
+def _pretty(slug: str) -> str:
+    slug = re.sub(r"-capital$", "", slug.strip().lower())
+    return " ".join(w.capitalize() if w not in ("de", "del", "la", "el", "les", "i") else w
+                    for w in slug.replace("_", "-").split("-") if w)
+
+
+def parse_zone(href: str, title: str) -> str:
+    """Ubicación legible, p. ej. 'Poblenou, Barcelona'. Primero de la URL de Habitaclia
+    (.../<zona>/<ciudad>/<uuid>/d), si no del título ('... en <zona>')."""
+    m = re.search(r"/alquiler/(?:[^/]+/)*?([^/]+)/([^/]+)/" + UUID + r"/d", href)
+    if m:
+        zone, city = _pretty(m.group(1)), _pretty(m.group(2))
+        if zone.lower() in ("n a", "na", ""):
+            return city
+        return zone if zone.lower() == city.lower() else f"{zone}, {city}"
+    t = re.search(r"\ben\s+([^,|·]{3,60}?)(?:\s*[,|·].*)?$", title.strip(), re.I)
+    return t.group(1).strip() if t else ""
+
+
 def _title(card, link_re: str) -> str:
     label = card.get("aria-label")
     if label:
@@ -116,11 +135,13 @@ def extract_listings(html: str, base_url: str, source: str) -> list[Listing]:
             card = a
         text += _agencies(card)
 
+        title = _title(card, link_re)
         found[ext_id] = Listing(
             source=source,
             ext_id=ext_id,
             url=href,
-            title=_title(card, link_re),
+            title=title,
+            zone=parse_zone(href, title),
             price=parse_price(text),
             rooms=parse_rooms(text),
             size_m2=parse_size(text),
