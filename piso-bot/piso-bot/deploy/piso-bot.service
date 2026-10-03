@@ -1,0 +1,15 @@
+[Unit]
+Description=Buscador de piso/habitacion (Telegram)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/piso-bot
+ExecStart=/home/ubuntu/piso-bot/.venv/bin/python -m piso_bot run
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=multi-user.target

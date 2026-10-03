@@ -1,0 +1,62 @@
+name: piso-bot
+
+on:
+  schedule:
+    # Cada ~10 min, evitando la hora en punto (GitHub retrasa más los cron de :00).
+    - cron: "3,13,23,33,43,53 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Qué ejecutar"
+        type: choice
+        default: tick
+        options: [tick, check-urls, dry-run]
+
+# Nunca dos pasadas a la vez (compartirían la base de datos).
+concurrency:
+  group: piso-bot
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      PROFILE_YAML: ${{ secrets.PROFILE_YAML }}
+      MODE: ${{ github.event.inputs.mode || 'tick' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Estado (anuncios ya vistos, botones atendidos): se restaura la caché más reciente...
+      - uses: actions/cache/restore@v4
+        with:
+          path: data
+          key: state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: state-
+
+      - name: Ejecutar
+        run: |
+          case "$MODE" in
+            check-urls) python -m piso_bot check-urls ;;
+            dry-run)    python -m piso_bot once --dry ;;
+            *)          python -m piso_bot tick ;;
+          esac
+
+      # ...y se guarda siempre, incluso si la pasada falló a medias, para no repetir avisos.
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: data
+          key: state-${{ github.run_id }}-${{ github.run_attempt }}

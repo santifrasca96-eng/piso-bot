@@ -1,0 +1,144 @@
+# ============================================================
+#  Configuración del buscador de piso / habitación (Barcelona)
+# ============================================================
+
+poll_minutes: 10            # cada cuántos minutos se revisan las búsquedas
+first_run_max_alerts: 5     # en la primera pasada de cada búsqueda, máximo de avisos (el resto se marca como visto)
+request_delay_seconds: [4, 9]   # pausa aleatoria entre peticiones (educado con los portales)
+
+budget:
+  room_max: 600             # habitación, gastos incluidos
+  room_min: 150             # por debajo suele ser un error de lectura
+  flat_max: 1400            # piso entero, sin gastos
+  flat_min_rooms: 2
+  max_flatmates: 4          # compañeros de piso como máximo (piso de máx. 5 habitaciones en total)
+
+# Datos de ejemplo. Tus datos reales NO se escriben aquí si el repositorio es público:
+# van en el secreto PROFILE_YAML de GitHub (ver README), que pisa estos valores.
+# En local (tu PC o un servidor privado) sí puedes editarlos directamente.
+profile:
+  name: "TU NOMBRE"
+  age: 30
+  job: "tu profesión"
+  move_in: "enero de 2027"
+  phone: "+XX XXX XXX XXX"
+  extra_room_lines: []       # frases extra para el mensaje de habitación (opcional)
+
+# Palabras (sin tildes, en minúsculas) que se buscan en el texto del anuncio.
+keywords:
+  reject:                   # descarta el anuncio
+    - "temporada"
+    - "temporal"
+    - "estancia corta"
+    - "corta estancia"
+    - "vacacional"
+    - "solo estudiantes"
+    - "litera"
+    - "cama en habitacion"
+    - "compartir habitacion"
+    - "habitacion compartida para"
+  reject_regex:
+    - "(maximo|max\\.?|hasta)\\s*\\d+\\s*meses"
+    - "\\b([1-9]|1[01])\\s*meses\\b"      # contratos de menos de 12 meses
+  unfurnished:              # descarta pisos explícitamente sin muebles
+    - "sin amueblar"
+    - "sin muebles"
+    - "no amueblad"
+    - "vacio"
+  furnished:
+    - "amueblad"
+    - "mobiliari"
+    - "equipad"
+  long_term:
+    - "larga duracion"
+    - "larga estancia"
+    - "contrato de 1 ano"
+    - "contrato de un ano"
+    - "contrato anual"
+    - "1 ano prorrogable"
+    - "12 meses"
+  sublet_ok:
+    - "subarrend"
+    - "alquiler por habitaciones"
+    - "se admite compartir"
+    - "ideal compartir"
+    - "ideal para compartir"
+  friendly:
+    - "autonomo"
+    - "extranjero"
+    - "sin nomina"
+    - "sin aval"
+    - "sin avalista"
+    - "todo tipo de perfiles"
+  video_visit:
+    - "videollamada"
+    - "visita virtual"
+    - "visita online"
+  scam:
+    - "western union"
+    - "estoy fuera"
+    - "estoy en el extranjero"
+    - "fuera del pais"
+    - "envio las llaves"
+    - "enviar las llaves"
+    - "reserva por adelantado"
+    - "transferencia antes"
+    - "bizum antes"
+    - "pago por adelantado"
+  costs_not_included:
+    - "gastos no incluidos"
+    - "mas gastos"
+    - "+ gastos"
+    - "sin gastos incluidos"
+    - "suministros aparte"
+    - "luz y agua aparte"
+  agency:
+    - "inmobiliaria"
+    - "agencia"
+    - "honorarios"
+    - "gastos de gestion"
+
+# ------------------------------------------------------------------
+# Búsquedas. `url` = página de resultados del portal.
+# `zones`: si se indica, el texto del anuncio debe mencionar alguna (para búsquedas amplias).
+# Las URLs marcadas "verificada" funcionaron al explorarlas; el resto hay que comprobarlas
+# con:   python -m piso_bot check-urls
+# ------------------------------------------------------------------
+searches:
+
+  # ---------- PISO ENTERO (2+ hab., hasta 1.400 €) ----------
+  - {name: "Piso Nou Barris (Habitaclia)",      source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-nou_barris-barcelona.htm"}          # verificada
+  - {name: "Piso Sant Andreu (Habitaclia)",     source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-sant_andreu-barcelona.htm"}          # verificada
+  - {name: "Piso Sants-Montjuic (Habitaclia)",  source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-sants_montjuic-barcelona.htm"}       # verificada
+  - {name: "Piso Horta-Guinardo (Habitaclia)",  source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-horta_guinardo-barcelona.htm"}       # verificada
+  - {name: "Piso Poblenou (Habitaclia)",        source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-poblenou-barcelona.htm"}             # verificada
+  - {name: "Piso Badalona (Habitaclia)",        source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-badalona.htm"}                       # verificada
+  - {name: "Piso Sant Adria (Habitaclia)",      source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-sant_adria_de_besos.htm"}            # verificada
+  - {name: "Piso L'Hospitalet (Habitaclia)",    source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-hospitalet_de_llobregat.htm"}        # verificada
+  - {name: "Piso Santa Coloma (Habitaclia)",    source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-santa_coloma_de_gramenet.htm"}       # verificada
+  - {name: "Piso Cornella (Habitaclia)",        source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-cornella_de_llobregat.htm"}          # sin verificar
+  - {name: "Piso El Prat (Habitaclia)",         source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-prat_de_llobregat_el.htm"}           # sin verificar
+  - {name: "Piso Mataro (Habitaclia)",          source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-mataro.htm"}                         # sin verificar
+  - {name: "Piso Badalona (Milanuncios)",       source: milanuncios, kind: flat, url: "https://www.milanuncios.com/alquiler-de-pisos-en-badalona-barcelona/"}  # verificada
+  # Idealista: bloquea mucho. Solo esta URL abrió al explorar; el resto dio 404. Se ordena por precio ascendente.
+  - {name: "Piso L'Hospitalet (Idealista)",     source: idealista, kind: flat, url: "https://www.idealista.com/en/alquiler-viviendas/hospitalet-de-llobregat-barcelona/?ordenado-por=precios-asc"}
+
+  # ---------- HABITACIÓN (hasta 600 € con gastos) ----------
+  - name: "Habitaciones Barcelona (Milanuncios)"
+    source: milanuncios
+    kind: room
+    url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-barcelona/"     # sin verificar
+    zones: &barrios_bcn [sants, hostafrancs, bordeta, sant andreu, sagrera, nou barris, prosperitat, turo de la peira,
+                         vilapicina, trinitat, verdun, roquetes, guineueta, horta, guinardo, poblenou, poble nou,
+                         sant marti, verneda, provencals, clot, besos, maresme]
+  - name: "Habitaciones Barcelona (Habitaclia)"
+    source: habitaclia
+    kind: room
+    url: "https://www.habitaclia.com/alquiler-habitacion-barcelona.htm"           # sin verificar
+    zones: *barrios_bcn
+  - {name: "Habitaciones Badalona (Milanuncios)",     source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-badalona-barcelona/"}
+  - {name: "Habitaciones L'Hospitalet (Milanuncios)", source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-hospitalet-de-llobregat-barcelona/"}
+  - {name: "Habitaciones Cornella (Milanuncios)",     source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-cornella-de-llobregat-barcelona/"}
+  - {name: "Habitaciones Santa Coloma (Milanuncios)", source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-santa-coloma-de-gramenet-barcelona/"}
+  - {name: "Habitaciones Sant Adria (Milanuncios)",   source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-sant-adria-de-besos-barcelona/"}
+  - {name: "Habitaciones Mataro (Milanuncios)",       source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-mataro-barcelona/"}
