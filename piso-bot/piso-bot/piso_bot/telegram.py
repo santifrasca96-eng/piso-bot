@@ -33,7 +33,7 @@ class Telegram:
         kind = "🛏 Habitación" if l.kind == "room" else "🏠 Piso"
         lines = [
             f"<b>{kind} · {l.price} €</b> · puntuación {l.score}/100",
-            html.escape(l.title),
+            (f"\U0001F4CD <b>{html.escape(l.zone)}</b>\n" if l.zone else "") + html.escape(l.title),
         ]
         facts = []
         if l.rooms:
