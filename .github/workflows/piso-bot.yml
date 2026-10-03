@@ -22,9 +22,6 @@ jobs:
   run:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
-    defaults:
-      run:
-        working-directory: piso-bot
     env:
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -33,21 +30,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Localizar el proyecto
+        id: loc
+        run: |
+          MAIN=$(find . -path '*/piso_bot/__main__.py' -print -quit)
+          if [ -z "$MAIN" ]; then
+            echo "No encuentro piso_bot/__main__.py. Estos son los archivos del repositorio:"
+            find . -path ./.git -prune -o -type f -print | head -60
+            exit 1
+          fi
+          DIR=$(dirname "$(dirname "$MAIN")")
+          echo "Proyecto en: $DIR"
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-          cache-dependency-path: piso-bot/requirements.txt
 
-      - run: pip install -r requirements.txt
+      - name: Instalar dependencias
+        working-directory: ${{ steps.loc.outputs.dir }}
+        run: pip install -r requirements.txt
 
       - uses: actions/cache/restore@v4
         with:
-          path: piso-bot/data
+          path: ${{ steps.loc.outputs.dir }}/data
           key: state-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: state-
 
       - name: Ejecutar
+        working-directory: ${{ steps.loc.outputs.dir }}
         run: |
           case "$MODE" in
             check-urls) python -m piso_bot check-urls ;;
@@ -56,7 +67,7 @@ jobs:
           esac
 
       - uses: actions/cache/save@v4
-        if: always()
+        if: always() && steps.loc.outputs.dir != ''
         with:
-          path: piso-bot/data
+          path: ${{ steps.loc.outputs.dir }}/data
           key: state-${{ github.run_id }}-${{ github.run_attempt }}
