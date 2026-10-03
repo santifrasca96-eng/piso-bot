@@ -37,6 +37,9 @@ keywords:
     - "cama en habitacion"
     - "compartir habitacion"
     - "habitacion compartida para"
+    - "agencia:spotahome"       # plataformas de alquiler temporal (no larga duración)
+    - "agencia:uniplaces"
+    - "agencia:housinganywhere"
   reject_regex:
     - "(maximo|max\\.?|hasta)\\s*\\d+\\s*meses"
     - "\\b([1-9]|1[01])\\s*meses\\b"      # contratos de menos de 12 meses
@@ -117,28 +120,33 @@ searches:
   - {name: "Piso L'Hospitalet (Habitaclia)",    source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-hospitalet_de_llobregat.htm"}        # verificada
   - {name: "Piso Santa Coloma (Habitaclia)",    source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-santa_coloma_de_gramenet.htm"}       # verificada
   - {name: "Piso Cornella (Habitaclia)",        source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-cornella_de_llobregat.htm"}          # sin verificar
-  - {name: "Piso El Prat (Habitaclia)",         source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-prat_de_llobregat_el.htm"}           # sin verificar
+  - {name: "Piso El Prat (Habitaclia)",         source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler/viviendas/barcelona-provincia/el-prat-de-llobregat/s"}  # verificada en navegador
   - {name: "Piso Mataro (Habitaclia)",          source: habitaclia, kind: flat, url: "https://www.habitaclia.com/alquiler-mataro.htm"}                         # sin verificar
-  - {name: "Piso Badalona (Milanuncios)",       source: milanuncios, kind: flat, url: "https://www.milanuncios.com/alquiler-de-pisos-en-badalona-barcelona/"}  # verificada
+  - {name: "Piso Badalona (Milanuncios)",       source: milanuncios, kind: flat, url: "https://www.milanuncios.com/alquiler-de-pisos-en-badalona-barcelona/", enabled: false}  # verificada
   # Idealista: bloquea mucho. Solo esta URL abrió al explorar; el resto dio 404. Se ordena por precio ascendente.
-  - {name: "Piso L'Hospitalet (Idealista)",     source: idealista, kind: flat, url: "https://www.idealista.com/en/alquiler-viviendas/hospitalet-de-llobregat-barcelona/?ordenado-por=precios-asc"}
+  - {name: "Piso L'Hospitalet (Idealista)",     source: idealista, kind: flat, url: "https://www.idealista.com/en/alquiler-viviendas/hospitalet-de-llobregat-barcelona/?ordenado-por=precios-asc", enabled: false}
 
   # ---------- HABITACIÓN (hasta 600 € con gastos) ----------
+  # Desactivadas (enabled: false) porque Milanuncios e Idealista devuelven 403 a las IPs de GitHub y
+  # Habitaclia no tiene sección de habitaciones. Funcionan si el bot corre desde un PC doméstico
+  # (python -m piso_bot run): ahí se pueden poner en `true`.
   - name: "Habitaciones Barcelona (Milanuncios)"
     source: milanuncios
     kind: room
-    url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-barcelona/"     # sin verificar
+    enabled: false
+    url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-barcelona/"
     zones: &barrios_bcn [sants, hostafrancs, bordeta, sant andreu, sagrera, nou barris, prosperitat, turo de la peira,
                          vilapicina, trinitat, verdun, roquetes, guineueta, horta, guinardo, poblenou, poble nou,
                          sant marti, verneda, provencals, clot, besos, maresme]
-  - name: "Habitaciones Barcelona (Habitaclia)"
+  - name: "Habitaciones Barcelona (Habitaclia)"      # esa URL no existe (404): Habitaclia no tiene habitaciones
     source: habitaclia
     kind: room
-    url: "https://www.habitaclia.com/alquiler-habitacion-barcelona.htm"           # sin verificar
+    enabled: false
+    url: "https://www.habitaclia.com/alquiler-habitacion-barcelona.htm"
     zones: *barrios_bcn
-  - {name: "Habitaciones Badalona (Milanuncios)",     source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-badalona-barcelona/"}
-  - {name: "Habitaciones L'Hospitalet (Milanuncios)", source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-hospitalet-de-llobregat-barcelona/"}
-  - {name: "Habitaciones Cornella (Milanuncios)",     source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-cornella-de-llobregat-barcelona/"}
-  - {name: "Habitaciones Santa Coloma (Milanuncios)", source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-santa-coloma-de-gramenet-barcelona/"}
-  - {name: "Habitaciones Sant Adria (Milanuncios)",   source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-sant-adria-de-besos-barcelona/"}
-  - {name: "Habitaciones Mataro (Milanuncios)",       source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-mataro-barcelona/"}
+  - {name: "Habitaciones Badalona (Milanuncios)",     source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-badalona-barcelona/", enabled: false}
+  - {name: "Habitaciones L'Hospitalet (Milanuncios)", source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-hospitalet-de-llobregat-barcelona/", enabled: false}
+  - {name: "Habitaciones Cornella (Milanuncios)",     source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-cornella-de-llobregat-barcelona/", enabled: false}
+  - {name: "Habitaciones Santa Coloma (Milanuncios)", source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-santa-coloma-de-gramenet-barcelona/", enabled: false}
+  - {name: "Habitaciones Sant Adria (Milanuncios)",   source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-sant-adria-de-besos-barcelona/", enabled: false}
+  - {name: "Habitaciones Mataro (Milanuncios)",       source: milanuncios, kind: room, url: "https://www.milanuncios.com/alquiler-de-habitaciones-en-mataro-barcelona/", enabled: false}
